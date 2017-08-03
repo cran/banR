@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Pierre-Antoine Chevalier (Etalab), Joël Gombin (Datactivist)" />
+
+<meta name="date" content="2017-08-03" />
+
+<title>Geocoding French adresses with BanR</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Geocoding French adresses with BanR</h1>
+<h4 class="author"><em>Pierre-Antoine Chevalier (Etalab), Joël Gombin (Datactivist)</em></h4>
+<h4 class="date"><em>2017-08-03</em></h4>
+
+
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;tibble&quot;</span>)
+<span class="kw">library</span>(<span class="st">&quot;dplyr&quot;</span>)</code></pre></div>
+<pre><code>## 
+## Attaching package: 'dplyr'</code></pre>
+<pre><code>## The following objects are masked from 'package:stats':
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;banR&quot;</span>)
+<span class="co"># generate fake data</span>
+table_test &lt;-<span class="st"> </span>tibble::<span class="kw">tibble</span>(
+  <span class="dt">adress =</span> <span class="kw">c</span>(<span class="st">&quot;39 quai André Citroën&quot;</span>, <span class="st">&quot;64 Allée de Bercy&quot;</span>, <span class="st">&quot;20 avenue de Ségur&quot;</span>),
+  <span class="dt">postal_code =</span> <span class="kw">c</span>(<span class="st">&quot;75015&quot;</span>, <span class="st">&quot;75012&quot;</span>, <span class="st">&quot;75007&quot;</span>),
+  <span class="dt">z =</span> <span class="kw">rnorm</span>(<span class="dv">3</span>)
+  )</code></pre></div>
+<ul>
+<li><code>geocode()</code> geocodes a single address</li>
+<li><code>reverse_geocode()</code> reverse geocodes a single pair of longitude and latitude</li>
+<li><code>geocode_tbl()</code> geocodes a data frame</li>
+<li><code>reverse_geocode_tbl()</code> reverse geocodes a data frame</li>
+</ul>
+<div id="geocode" class="section level2">
+<h2>Geocode</h2>
+<p>Geocoding is the process of transforming a human readable address into a location (ie a pair of latitude and longitude).</p>
+<div id="a-single-address" class="section level3">
+<h3>A single address</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">geocode</span>(<span class="dt">query =</span> <span class="st">&quot;39 quai André Citroën, Paris&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">glimpse</span>()</code></pre></div>
+<pre><code>## 200</code></pre>
+<pre><code>## Observations: 1
+## Variables: 17
+## $ id          &lt;chr&gt; &quot;ADRNIVX_0000000270792870&quot;
+## $ importance  &lt;dbl&gt; 0.3044
+## $ name        &lt;chr&gt; &quot;39 Quai André Citroën&quot;
+## $ postcode    &lt;chr&gt; &quot;75015&quot;
+## $ housenumber &lt;chr&gt; &quot;39&quot;
+## $ citycode    &lt;chr&gt; &quot;75115&quot;
+## $ x           &lt;dbl&gt; 647095.1
+## $ label       &lt;chr&gt; &quot;39 Quai André Citroën 75015 Paris&quot;
+## $ y           &lt;dbl&gt; 6860995
+## $ street      &lt;chr&gt; &quot;Quai André Citroën&quot;
+## $ context     &lt;chr&gt; &quot;75, Paris, Île-de-France&quot;
+## $ type        &lt;chr&gt; &quot;housenumber&quot;
+## $ city        &lt;chr&gt; &quot;Paris&quot;
+## $ score       &lt;dbl&gt; 0.9367636
+## $ type_geo    &lt;chr&gt; &quot;Point&quot;
+## $ longitude   &lt;dbl&gt; 2.279092
+## $ latitude    &lt;dbl&gt; 48.84683</code></pre>
+<p>The BAN API sends back both projected/Cartesian coordinates (<code>x</code> and <code>y</code> columns - they use Lambert 93 projection, aka as EPSG:2154), and lon/lat (i.e. WGS84) coordinates (<code>longitude</code> and <code>latitude</code> columns). It also indicates the degree of confidence it has in each result (column <code>score</code>). The above example only sends back one result, but sometimes the API will send back several suggestion for the same query. They are ordered by descending order of confidence.</p>
+</div>
+<div id="a-data-frame" class="section level3">
+<h3>A data frame</h3>
+<p>In addition to the adress, <code>geocode_tbl()</code> can take as argument either the <a href="https://en.wikipedia.org/wiki/Postal_codes_in_France">postal code</a> or the French official code (<a href="https://en.wikipedia.org/wiki/INSEE_code">INSEE code</a>) of the commune.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">geocode_tbl</span>(<span class="dt">tbl =</span> table_test, <span class="dt">adresse =</span> adress) %&gt;%
+<span class="st">  </span><span class="kw">glimpse</span>()</code></pre></div>
+<pre><code>## Writing tempfile to.../tmp/RtmprwpkoD/file3e13116ff3d4.csv</code></pre>
+<pre><code>## If file is larger than 8 MB, it must be splitted
+## Size is : 70 bytes</code></pre>
+<pre><code>## SuccessOKSuccess: (200) OK</code></pre>
+<pre><code>## Observations: 3
+## Variables: 16
+## $ postal_code        &lt;chr&gt; &quot;75015&quot;, &quot;75012&quot;, &quot;75007&quot;
+## $ z                  &lt;dbl&gt; -1.2872498, -0.5278212, 0.8121600
+## $ adress             &lt;chr&gt; &quot;39 quai André Citroën&quot;, &quot;64 Allée de Bercy...
+## $ latitude           &lt;dbl&gt; 48.84683, 48.84255, 48.85032
+## $ longitude          &lt;dbl&gt; 2.279092, 2.375933, 2.308332
+## $ result_label       &lt;chr&gt; &quot;39 Quai André Citroën 75015 Paris&quot;, &quot;64 Al...
+## $ result_score       &lt;dbl&gt; 0.94, 0.93, 0.95
+## $ result_type        &lt;chr&gt; &quot;housenumber&quot;, &quot;housenumber&quot;, &quot;housenumber&quot;
+## $ result_id          &lt;chr&gt; &quot;ADRNIVX_0000000270792870&quot;, &quot;ADRNIVX_000000...
+## $ result_housenumber &lt;int&gt; 39, 64, 20
+## $ result_name        &lt;chr&gt; &quot;Quai André Citroën&quot;, &quot;Allée de Bercy&quot;, &quot;Av...
+## $ result_street      &lt;chr&gt; NA, NA, NA
+## $ result_postcode    &lt;int&gt; 75015, 75012, 75007
+## $ result_city        &lt;chr&gt; &quot;Paris&quot;, &quot;Paris&quot;, &quot;Paris&quot;
+## $ result_context     &lt;chr&gt; &quot;75, Paris, Île-de-France&quot;, &quot;75, Paris, Île...
+## $ result_citycode    &lt;chr&gt; &quot;75115&quot;, &quot;75112&quot;, &quot;75107&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">geocode_tbl</span>(<span class="dt">tbl =</span> table_test, <span class="dt">adresse =</span> adress, <span class="dt">code_postal =</span> postal_code) %&gt;%
+<span class="st">  </span><span class="kw">glimpse</span>()</code></pre></div>
+<pre><code>## Writing tempfile to.../tmp/RtmprwpkoD/file3e135788af25.csv</code></pre>
+<pre><code>## If file is larger than 8 MB, it must be splitted
+## Size is : 100 bytes</code></pre>
+<pre><code>## SuccessOKSuccess: (200) OK</code></pre>
+<pre><code>## Observations: 3
+## Variables: 16
+## $ z                  &lt;dbl&gt; -1.2872498, -0.5278212, 0.8121600
+## $ adress             &lt;chr&gt; &quot;39 quai André Citroën&quot;, &quot;64 Allée de Bercy...
+## $ postal_code        &lt;chr&gt; &quot;75015&quot;, &quot;75012&quot;, &quot;75007&quot;
+## $ latitude           &lt;dbl&gt; 48.84683, 48.84255, 48.85032
+## $ longitude          &lt;dbl&gt; 2.279092, 2.375933, 2.308332
+## $ result_label       &lt;chr&gt; &quot;39 Quai André Citroën 75015 Paris&quot;, &quot;64 Al...
+## $ result_score       &lt;dbl&gt; 0.94, 0.93, 0.95
+## $ result_type        &lt;chr&gt; &quot;housenumber&quot;, &quot;housenumber&quot;, &quot;housenumber&quot;
+## $ result_id          &lt;chr&gt; &quot;ADRNIVX_0000000270792870&quot;, &quot;ADRNIVX_000000...
+## $ result_housenumber &lt;int&gt; 39, 64, 20
+## $ result_name        &lt;chr&gt; &quot;Quai André Citroën&quot;, &quot;Allée de Bercy&quot;, &quot;Av...
+## $ result_street      &lt;chr&gt; NA, NA, NA
+## $ result_postcode    &lt;int&gt; 75015, 75012, 75007
+## $ result_city        &lt;chr&gt; &quot;Paris&quot;, &quot;Paris&quot;, &quot;Paris&quot;
+## $ result_context     &lt;chr&gt; &quot;75, Paris, Île-de-France&quot;, &quot;75, Paris, Île...
+## $ result_citycode    &lt;chr&gt; &quot;75115&quot;, &quot;75112&quot;, &quot;75107&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;paris2012&quot;</span>)
+paris2012 %&gt;%
+<span class="st">  </span><span class="kw">slice</span>(<span class="dv">1</span>:<span class="dv">100</span>) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(
+    <span class="dt">adresse =</span> <span class="kw">paste</span>(numero, voie, nom),
+    <span class="dt">code_insee =</span> <span class="kw">paste0</span>(<span class="st">&quot;751&quot;</span>, arrondissement)
+    ) %&gt;%
+<span class="st">  </span><span class="kw">geocode_tbl</span>(<span class="dt">adresse =</span> adresse, <span class="dt">code_insee =</span> code_insee) %&gt;%
+<span class="st">  </span><span class="kw">glimpse</span>()</code></pre></div>
+<pre><code>## Writing tempfile to.../tmp/RtmprwpkoD/file3e1378b8580d.csv</code></pre>
+<pre><code>## If file is larger than 8 MB, it must be splitted
+## Size is : 3 Kb</code></pre>
+<pre><code>## SuccessOKSuccess: (200) OK</code></pre>
+<pre><code>## Observations: 100
+## Variables: 22
+## $ arrondissement     &lt;chr&gt; &quot;06&quot;, &quot;06&quot;, &quot;06&quot;, &quot;06&quot;, &quot;06&quot;, &quot;06&quot;, &quot;06&quot;, &quot;...
+## $ bureau             &lt;chr&gt; &quot;09&quot;, &quot;09&quot;, &quot;09&quot;, &quot;09&quot;, &quot;09&quot;, &quot;09&quot;, &quot;09&quot;, &quot;...
+## $ numero             &lt;int&gt; 4, 5, 6, 7, 8, 11, 12, 13, 14, 16, 3, 4, 5,...
+## $ voie               &lt;chr&gt; &quot;RUE DE L&quot;, &quot;RUE DE L&quot;, &quot;RUE DE L&quot;, &quot;RUE DE...
+## $ nom                &lt;chr&gt; &quot;ABBAYE&quot;, &quot;ABBAYE&quot;, &quot;ABBAYE&quot;, &quot;ABBAYE&quot;, &quot;AB...
+## $ nb                 &lt;int&gt; 1, 1, 20, 2, 17, 2, 9, 15, 17, 8, 13, 6, 6,...
+## $ ID                 &lt;chr&gt; &quot;0609&quot;, &quot;0609&quot;, &quot;0609&quot;, &quot;0609&quot;, &quot;0609&quot;, &quot;06...
+## $ adresse            &lt;chr&gt; &quot;4 RUE DE L ABBAYE&quot;, &quot;5 RUE DE L ABBAYE&quot;, &quot;...
+## $ code_insee         &lt;chr&gt; &quot;75106&quot;, &quot;75106&quot;, &quot;75106&quot;, &quot;75106&quot;, &quot;75106&quot;...
+## $ latitude           &lt;dbl&gt; 48.85405, 48.85406, 48.85413, 48.85410, 48....
+## $ longitude          &lt;dbl&gt; 2.335707, 2.335172, 2.335349, 2.335034, 2.3...
+## $ result_label       &lt;chr&gt; &quot;4 Rue de l'Abbaye 75006 Paris&quot;, &quot;5 Rue de ...
+## $ result_score       &lt;dbl&gt; 0.94, 0.94, 0.94, 0.94, 0.94, 0.94, 0.94, 0...
+## $ result_type        &lt;chr&gt; &quot;housenumber&quot;, &quot;housenumber&quot;, &quot;housenumber&quot;...
+## $ result_id          &lt;chr&gt; &quot;ADRNIVX_0000000270779523&quot;, &quot;ADRNIVX_000000...
+## $ result_housenumber &lt;int&gt; 4, 5, 6, 7, 8, 11, 12, 13, 14, 16, 3, 4, 5,...
+## $ result_name        &lt;chr&gt; &quot;Rue de l'Abbaye&quot;, &quot;Rue de l'Abbaye&quot;, &quot;Rue ...
+## $ result_street      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
+## $ result_postcode    &lt;int&gt; 75006, 75006, 75006, 75006, 75006, 75006, 7...
+## $ result_city        &lt;chr&gt; &quot;Paris&quot;, &quot;Paris&quot;, &quot;Paris&quot;, &quot;Paris&quot;, &quot;Paris&quot;...
+## $ result_context     &lt;chr&gt; &quot;75, Paris, Île-de-France&quot;, &quot;75, Paris, Île...
+## $ result_citycode    &lt;chr&gt; &quot;75106&quot;, &quot;75106&quot;, &quot;75106&quot;, &quot;75106&quot;, &quot;75106&quot;...</code></pre>
+</div>
+</div>
+<div id="reverse-geocode" class="section level2">
+<h2>Reverse geocode</h2>
+<p>Reverse geocoding is the process of back (reverse) coding of a point location (latitude, longitude) to a human readable address.</p>
+<div id="a-single-adress" class="section level3">
+<h3>A single adress</h3>
+<p><code>reverse_geocode()</code> takes longitude and latitude as arguments and returns a data frame with addresses.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">reverse_geocode</span>(<span class="dt">long =</span>  <span class="fl">2.279092</span>, <span class="dt">lat =</span> <span class="fl">48.84683</span>)  %&gt;%
+<span class="st">  </span><span class="kw">glimpse</span>()</code></pre></div>
+<pre><code>## 200</code></pre>
+<pre><code>## Observations: 1
+## Variables: 18
+## $ id          &lt;chr&gt; &quot;75115_0318_91e007&quot;
+## $ importance  &lt;dbl&gt; 0.3044
+## $ name        &lt;chr&gt; &quot;39 Quai André Citroën&quot;
+## $ distance    &lt;int&gt; 0
+## $ postcode    &lt;chr&gt; &quot;75015&quot;
+## $ housenumber &lt;chr&gt; &quot;39&quot;
+## $ citycode    &lt;chr&gt; &quot;75115&quot;
+## $ x           &lt;dbl&gt; 647050.2
+## $ label       &lt;chr&gt; &quot;39 Quai André Citroën 75015 Paris&quot;
+## $ y           &lt;dbl&gt; 6860963
+## $ street      &lt;chr&gt; &quot;Quai André Citroën&quot;
+## $ context     &lt;chr&gt; &quot;75, Paris, Île-de-France&quot;
+## $ type        &lt;chr&gt; &quot;housenumber&quot;
+## $ city        &lt;chr&gt; &quot;Paris&quot;
+## $ score       &lt;dbl&gt; 1
+## $ type_geo    &lt;chr&gt; &quot;Point&quot;
+## $ longitude   &lt;dbl&gt; 2.279092
+## $ latitude    &lt;dbl&gt; 48.84683</code></pre>
+</div>
+<div id="a-data-frame-1" class="section level3">
+<h3>A data frame</h3>
+<p><code>reverse_geocode_tbl</code> takes the names of the longitude and latitude columns and returns a data frame with adresses.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">test_df &lt;-<span class="st"> </span>tibble::<span class="kw">tibble</span>(
+  <span class="dt">nom =</span> <span class="kw">sample</span>(letters, <span class="dt">size =</span> <span class="dv">10</span>, <span class="dt">replace =</span> <span class="ot">FALSE</span>),
+  <span class="dt">lon =</span> <span class="kw">runif</span>(<span class="dv">10</span>, <span class="fl">2.19</span>, <span class="fl">2.47</span>),
+  <span class="dt">lat =</span> <span class="kw">runif</span>(<span class="dv">10</span>, <span class="fl">48.8</span>, <span class="fl">48.9</span>)
+)
+
+test_df %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">reverse_geocode_tbl</span>(lon, lat) %&gt;%<span class="st"> </span>
+<span class="st">  </span>glimpse</code></pre></div>
+<pre><code>## Writing tempfile to.../tmp/RtmprwpkoD/file3e13ab054b5.csv</code></pre>
+<pre><code>## If file is larger than 8 MB, it must be splitted
+## Size is : 385 bytes</code></pre>
+<pre><code>## SuccessOKSuccess: (200) OK</code></pre>
+<pre><code>## Observations: 10
+## Variables: 16
+## $ nom                &lt;chr&gt; &quot;e&quot;, &quot;l&quot;, &quot;h&quot;, &quot;w&quot;, &quot;q&quot;, &quot;b&quot;, &quot;z&quot;, &quot;f&quot;, &quot;i&quot;...
+## $ longitude          &lt;dbl&gt; 2.440785, 2.344905, 2.400404, 2.465059, 2.3...
+## $ latitude           &lt;dbl&gt; 48.84880, 48.88857, 48.83116, 48.80012, 48....
+## $ result_latitude    &lt;dbl&gt; 48.84876, 48.88860, 48.83016, 48.80045, 48....
+## $ result_longitude   &lt;dbl&gt; 2.441095, 2.344904, 2.400373, 2.465499, 2.3...
+## $ result_label       &lt;chr&gt; &quot;9 Rue Joseph Gaillard 94300 Vincennes&quot;, &quot;R...
+## $ result_distance    &lt;int&gt; 23, 2, 110, 49, 43, 127, 26, 124, 61, 17
+## $ result_type        &lt;chr&gt; &quot;housenumber&quot;, &quot;street&quot;, &quot;housenumber&quot;, &quot;ho...
+## $ result_id          &lt;chr&gt; &quot;94080_4760_d8c229&quot;, &quot;75118_0624_db6cd5&quot;, &quot;...
+## $ result_housenumber &lt;chr&gt; &quot;9&quot;, NA, &quot;9001&quot;, &quot;9&quot;, &quot;18 A&quot;, &quot;64&quot;, &quot;6&quot;, &quot;2...
+## $ result_name        &lt;chr&gt; &quot;Rue Joseph Gaillard&quot;, &quot;Rue Bachelet&quot;, &quot;Ave...
+## $ result_street      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA
+## $ result_postcode    &lt;chr&gt; &quot;94300&quot;, &quot;75018&quot;, &quot;75012&quot;, &quot;94000&quot;, &quot;94200&quot;...
+## $ result_city        &lt;chr&gt; &quot;Vincennes&quot;, &quot;Paris&quot;, &quot;Paris&quot;, &quot;Créteil&quot;, &quot;...
+## $ result_context     &lt;chr&gt; &quot;94, Val-de-Marne, Île-de-France&quot;, &quot;75, Par...
+## $ result_citycode    &lt;chr&gt; &quot;94080&quot;, &quot;75118&quot;, &quot;75112&quot;, &quot;94028&quot;, &quot;94041&quot;...</code></pre>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
