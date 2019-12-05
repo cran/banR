@@ -1,4 +1,4 @@
-## ----setup---------------------------------------------------------------
+## ----setup--------------------------------------------------------------------
 library("tibble")
 library("dplyr")
 library("banR")
@@ -9,19 +9,19 @@ table_test <- tibble::tibble(
   z = rnorm(3)
   )
 
-## ----geocode-------------------------------------------------------------
+## ----geocode------------------------------------------------------------------
 geocode(query = "39 quai André Citroën, Paris") %>%
   glimpse()
 
-## ----geocode-tbl---------------------------------------------------------
+## ----geocode-tbl--------------------------------------------------------------
 geocode_tbl(tbl = table_test, adresse = adress) %>%
   glimpse()
 
-## ----geocode-tbl-postalcode----------------------------------------------
+## ----geocode-tbl-postalcode---------------------------------------------------
 geocode_tbl(tbl = table_test, adresse = adress, code_postal = postal_code) %>%
   glimpse()
 
-## ----geocode-tbl-codeinsee-----------------------------------------------
+## ----geocode-tbl-codeinsee----------------------------------------------------
 data("paris2012")
 paris2012 %>%
   slice(1:100) %>%
@@ -32,11 +32,11 @@ paris2012 %>%
   geocode_tbl(adresse = adresse, code_insee = code_insee) %>%
   glimpse()
 
-## ----reverse-geocode-----------------------------------------------------
+## ----reverse-geocode----------------------------------------------------------
 reverse_geocode(long =  2.279092, lat = 48.84683)  %>%
   glimpse()
 
-## ----reverse-geocode-tbl-------------------------------------------------
+## ----reverse-geocode-tbl------------------------------------------------------
 test_df <- tibble::tibble(
   nom = sample(letters, size = 10, replace = FALSE),
   lon = runif(10, 2.19, 2.47),

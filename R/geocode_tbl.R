@@ -46,7 +46,7 @@ geocode_tbl <- function(tbl, adresse, code_insee = NULL, code_postal = NULL) {
     !!! purrr::map(
       .x = vars,
       .f = function(sym) {
-        rlang::lang("-", sym)
+        rlang::call2("-", sym)
         }
       )
     )
@@ -54,7 +54,7 @@ geocode_tbl <- function(tbl, adresse, code_insee = NULL, code_postal = NULL) {
   body <- list(
     columns = rlang::enquo(arg = adresse),
     citycode = rlang::enquo(arg = code_insee),
-    postalcode = rlang::enquo(arg = code_postal)
+    postcode = rlang::enquo(arg = code_postal)
   ) %>%
   purrr::discard(rlang::quo_is_null) %>%
   purrr::map(rlang::quo_name)
@@ -84,10 +84,10 @@ geocode_tbl <- function(tbl, adresse, code_insee = NULL, code_postal = NULL) {
         result_score = readr::col_double(),
         result_type = readr::col_character(),
         result_id = readr::col_character(),
-        result_housenumber = readr::col_integer(),
+        result_housenumber = readr::col_character(),
         result_name = readr::col_character(),
         result_street = readr::col_character(),
-        result_postcode = readr::col_integer(),
+        result_postcode = readr::col_character(),
         result_city = readr::col_character(),
         result_context = readr::col_character(),
         result_citycode = readr::col_character()
@@ -140,7 +140,7 @@ reverse_geocode_tbl <- function(tbl, longitude, latitude) {
     !!! purrr::map(
       .x = vars,
       .f = function(sym) {
-        rlang::lang("-", sym)
+        rlang::call2("-", sym)
         })
     )
 
