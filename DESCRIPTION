@@ -1,7 +1,7 @@
 Package: banR
 Type: Package
 Title: R Client for the BAN API
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: c(
     person("Joel", "Gombin", email = "joel.gombin@gmail.com", role = c("cre", "aut")),
     person("Paul-Antoine", "Chevalier", email = "pachevalier@gmail.com", role = "aut"))
@@ -13,15 +13,16 @@ Depends: R (>= 2.10)
 Imports: dplyr (>= 0.7.0), httr, readr, magrittr, tibble, purrr, rlang,
         utils
 Suggests: testthat, knitr, rmarkdown
-RoxygenNote: 7.0.1
+RoxygenNote: 7.1.0
 Encoding: UTF-8
-URL: http://joelgombin.github.io/banR/
+URL: http://joelgombin.github.io/banR/,
+        http://github.com/joelgombin/banR/
 BugReports: http://github.com/joelgombin/banR/issues
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2019-12-05 04:32:39 UTC; joel
+Packaged: 2020-05-11 08:55:10 UTC; joel
 Author: Joel Gombin [cre, aut],
   Paul-Antoine Chevalier [aut]
 Maintainer: Joel Gombin <joel.gombin@gmail.com>
 Repository: CRAN
-Date/Publication: 2019-12-05 07:00:03 UTC
+Date/Publication: 2020-05-11 09:10:12 UTC
