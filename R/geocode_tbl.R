@@ -1,26 +1,26 @@
-#' Geocode tbl 
+#' Geocode tbl
 #'
 #' Geocode tbl geocodes a whole data frame
 #'
 #' @param tbl a data frame or tibble
-#' @param adresse adress column 
+#' @param adresse adress column
 #' @param code_insee official citycode column
 #' @param code_postal official postcode column
 #'
 #' @return an augmented data frame of class tbl with latitude, longitude, etc
-#' @export 
+#' @export
 #'
 #' @examples
-#' 
+#'
 #' table_test <- tibble::tibble(
-#' x = c("39 quai Andre Citroen", "64 Allee de Bercy", "20 avenue de Segur"), 
-#' y = c("75015", "75012", "75007"), 
+#' x = c("39 quai Andre Citroen", "64 Allee de Bercy", "20 avenue de Segur"),
+#' y = c("75015", "75012", "75007"),
 #' z = rnorm(3)
 #' )
-#' 
+#'
 #' geocode_tbl(tbl = table_test, adresse = x)
 #' geocode_tbl(tbl = table_test, adresse = x, code_postal = y)
-#' 
+#'
 geocode_tbl <- function(tbl, adresse, code_insee = NULL, code_postal = NULL) {
 
   tmp <- paste0(tempfile(), ".csv")
@@ -34,10 +34,15 @@ geocode_tbl <- function(tbl, adresse, code_insee = NULL, code_postal = NULL) {
   purrr::discard(rlang::quo_is_null)
 
   dplyr::select(.data = tbl, !!! vars) %>%
-    readr::write_csv(path = tmp)
+    dplyr::mutate(
+      {{adresse}} := stringr::str_replace(
+        {{adresse}}, "'", " "
+        )
+      ) %>%
+    readr::write_csv(file = tmp, na = "")
 
   message(
-    "If file is larger than 8 MB, it must be splitted\n",
+    "If file is larger than 50 MB, it must be splitted\n",
     "Size is : ", format_object_size(x = file.size(tmp), units = "auto")
   )
 
@@ -62,7 +67,7 @@ geocode_tbl <- function(tbl, adresse, code_insee = NULL, code_postal = NULL) {
   body$data <- httr::upload_file(path = tmp)
   body$delimiter <- ","
 
-  base_url  <- "http://api-adresse.data.gouv.fr/search/csv/"
+  base_url  <- "https://data.geopf.fr/geocodage/search/csv/"
 
   query_results <- httr::POST(
     url = base_url,
@@ -105,7 +110,7 @@ geocode_tbl <- function(tbl, adresse, code_insee = NULL, code_postal = NULL) {
 #' Reverse geocode tbl
 #'
 #' reverse geocode a data frame
-#' 
+#'
 #' @param tbl name of the tibble
 #' @param longitude name of the longitude column
 #' @param latitude name of the latitude column
@@ -114,15 +119,15 @@ geocode_tbl <- function(tbl, adresse, code_insee = NULL, code_postal = NULL) {
 #' @export
 #'
 #' @examples
-#' 
+#'
 #' table_reverse <- tibble::tibble(
-#' x = c(2.279092, 2.375933,2.308332), 
-#' y = c(48.84683, 48.84255, 48.85032), 
+#' x = c(2.279092, 2.375933,2.308332),
+#' y = c(48.84683, 48.84255, 48.85032),
 #' z = rnorm(3)
 #' )
-#' 
+#'
 #' reverse_geocode_tbl(tbl = table_reverse, longitude = x, latitude = y)
-#' 
+#'
 reverse_geocode_tbl <- function(tbl, longitude, latitude) {
 
   tmp <- paste0(tempfile(), ".csv")
@@ -133,7 +138,7 @@ reverse_geocode_tbl <- function(tbl, longitude, latitude) {
     "latitude" = rlang::enquo(latitude)
     )
   dplyr::select(.data = tbl, !!! vars) %>%
-    readr::write_csv(path = tmp)
+    readr::write_csv(file = tmp, na = "")
 
   tbl_temp <- dplyr::select(
     .data = tbl,
@@ -145,7 +150,7 @@ reverse_geocode_tbl <- function(tbl, longitude, latitude) {
     )
 
   message(
-    "If file is larger than 8 MB, it must be splitted\n",
+    "If file is larger than 50 MB, it must be splitted\n",
     "Size is : ", format_object_size(x = file.size(tmp), units = "auto")
   )
 
@@ -154,7 +159,7 @@ reverse_geocode_tbl <- function(tbl, longitude, latitude) {
     delimiter = ","
   )
 
-  base_url  <- "https://api-adresse.data.gouv.fr/reverse/csv/"
+  base_url  <- "https://data.geopf.fr/geocodage/reverse/csv/"
 
   query_results <- httr::POST(
     url = base_url,
