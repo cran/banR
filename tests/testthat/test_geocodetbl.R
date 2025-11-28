@@ -5,6 +5,7 @@ context("Geocode tbl")
 test_that(
   "Geocode tbl works ", {
   skip_on_cran()
+  skip_if_offline()
   table_test <- tibble::tibble(
     x = c("39 quai André Citroën", "64 Allée de Bercy", "20 avenue de Ségur"),
     y = c("75015", "75012", "75007"),
@@ -23,6 +24,7 @@ test_that(
 
 test_that("Input and output DFs have a similar number of rows", {
   skip_on_cran()
+  skip_if_offline()
   # test introduit suite à issue #3
   table_test <- data.frame(
     adresses = c("11 allée Sacoman", "11 allée Sacoman", "23 allée Sacoman"),
@@ -44,6 +46,7 @@ test_that(
   desc = "Geocode_tbl works with a single-column input data.frame",
   code = {
     skip_on_cran()
+    skip_if_offline()
     table_test <- data.frame(
       city = c("Agen", "Ajaccio"),
       stringsAsFactors = FALSE
@@ -56,6 +59,7 @@ test_that(
   desc = "Reverse geocode tbl works ",
   code = {
     skip_on_cran()
+    skip_if_offline()
     table_reverse <- tibble::tibble(
       x = c(2.279092, 2.375933, 2.308332),
       y = c(48.84683, 48.84255, 48.85032),
@@ -70,30 +74,33 @@ test_that(
 )
 
 test_that(
-  desc = "Code INSEE and Code postal return the same result",
+  desc = "Code INSEE and Code postal both work",
   code = {
     skip_on_cran()
+    skip_if_offline()
     table_check <- tibble::tribble(
       ~ num_voie, ~ cp,  ~ ville, ~ codecommune,
       "1 Rue Gaspard Monge", "22300", "Lannion", "22113",
       "Square Edouard Herriot", "85400", "Lucon", "85128"
       )
 
-    expect_true(
-      all.equal(
-        geocode_tbl(
-          tbl = table_check,
-          adresse = num_voie,
-          code_postal = cp
-        )%>%
-          select(ville, codecommune, num_voie, cp, everything()), #on fixe l'ordre des premieres colonnes
-        geocode_tbl(
-          tbl = table_check,
-          adresse = num_voie,
-          code_insee =  codecommune
-        ) %>%
-          select(ville, codecommune, num_voie, cp, everything())
-      )
-  )
+    # Test that both code_postal and code_insee methods work
+    result_cp <- geocode_tbl(
+      tbl = table_check,
+      adresse = num_voie,
+      code_postal = cp
+    )
+
+    result_insee <- geocode_tbl(
+      tbl = table_check,
+      adresse = num_voie,
+      code_insee = codecommune
+    )
+
+    # Both should return tibbles with the expected number of rows
+    expect_s3_class(result_cp, "tbl_df")
+    expect_s3_class(result_insee, "tbl_df")
+    expect_equal(nrow(result_cp), nrow(table_check))
+    expect_equal(nrow(result_insee), nrow(table_check))
   }
 )

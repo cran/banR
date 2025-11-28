@@ -1,7 +1,7 @@
 Package: banR
 Type: Package
 Title: Client for the 'BAN' API
-Version: 0.2.3
+Version: 0.2.4
 Authors@R: c(
     person("Joel", "Gombin", email = "joel.gombin@gmail.com", role = c("cre", "aut")),
     person("Paul-Antoine", "Chevalier", email = "pachevalier@gmail.com", role = "aut"))
@@ -20,9 +20,9 @@ URL: https://joelgombin.github.io/banR/,
 BugReports: https://github.com/joelgombin/banR/issues
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2025-11-18 18:19:00 UTC; joel
+Packaged: 2025-11-26 18:09:00 UTC; joel
 Author: Joel Gombin [cre, aut],
   Paul-Antoine Chevalier [aut]
 Maintainer: Joel Gombin <joel.gombin@gmail.com>
 Repository: CRAN
-Date/Publication: 2025-11-24 08:50:17 UTC
+Date/Publication: 2025-11-28 13:10:27 UTC
